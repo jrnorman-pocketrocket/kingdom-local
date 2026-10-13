@@ -1,0 +1,314 @@
+<title>Coast Kingdom Business Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: a hinterland-green header band with the search bar sitting on its edge, filter chips, a fold-out signup form, then a card list. */
+:root {
+  --bg: #f6f8f4;
+  --surface: #ffffff;
+  --ink: #17261d;
+  --muted: #586a5e;
+  --line: #dbe3da;
+  --band: #1f3d2c;
+  --band-ink: #eef4ec;
+  --accent: #f2b632;
+  --accent-ink: #2a1f00;
+  --chip: #e8efe6;
+  --chip-on: #1f3d2c;
+  --chip-on-ink: #ffffff;
+  --link: #1d6a49;
+  --good: #1d6a49;
+  --bad: #b3261e;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101813; --surface: #18231c; --ink: #e6eee7; --muted: #9fb2a5; --line: #2b3a30;
+    --band: #0c1410; --band-ink: #e6eee7; --accent: #f2b632; --accent-ink: #2a1f00;
+    --chip: #223027; --chip-on: #f2b632; --chip-on-ink: #2a1f00; --link: #7fd1a8;
+    --good: #7fd1a8; --bad: #ff8a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101813; --surface: #18231c; --ink: #e6eee7; --muted: #9fb2a5; --line: #2b3a30;
+  --band: #0c1410; --band-ink: #e6eee7; --accent: #f2b632; --accent-ink: #2a1f00;
+  --chip: #223027; --chip-on: #f2b632; --chip-on-ink: #2a1f00; --link: #7fd1a8;
+  --good: #7fd1a8; --bad: #ff8a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+a { color: var(--link); }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; }
+header.band { background: var(--band); color: var(--band-ink); padding-block: 40px 56px; }
+.eyebrow { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin: 0 0 8px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.9rem, 5vw, 3rem); line-height: 1.05; margin: 0; text-wrap: balance; max-width: 18ch; }
+.lede { margin: 12px 0 0; max-width: 58ch; opacity: 0.9; }
+.searchbar { margin-top: -28px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; display: flex; gap: 8px; box-shadow: 0 6px 24px rgba(15,35,24,0.12); }
+.searchbar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 1.05rem; padding: 10px 12px; }
+.searchbar input:focus { outline: none; }
+.searchbar:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.searchbar select { border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; padding: 8px 10px; max-width: 42%; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.chip { border: 0; background: var(--chip); color: var(--ink); font: inherit; font-size: 0.9rem; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); }
+.chip:focus-visible, .btn:focus-visible, .linkbtn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 22px; }
+.count { color: var(--muted); font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.btn { border: 0; cursor: pointer; font: inherit; background: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 10px 16px; border-radius: 10px; }
+.btn[disabled] { opacity: 0.6; cursor: wait; }
+.linkbtn { border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
+.notice { margin-top: 16px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 0.92rem; }
+
+.signup { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.signup h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; margin: 0; }
+.signup .sub { margin: 4px 0 16px; color: var(--muted); max-width: 60ch; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-weight: 600; font-size: 0.92rem; }
+.field .hint { font-weight: 400; color: var(--muted); }
+.field input, .field select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.field input:focus, .field select:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.check { display: flex; gap: 10px; align-items: flex-start; grid-column: 1 / -1; }
+.check input { width: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--band); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 16px; }
+.status { font-size: 0.95rem; }
+.status.ok { color: var(--good); }
+.status.err { color: var(--bad); }
+
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-block: 18px 40px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; line-height: 1.2; margin: 0; overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 0.85rem; color: var(--muted); margin: 0; }
+.tag { background: var(--chip); color: var(--ink); padding: 2px 8px; border-radius: 6px; }
+.ex { border: 1px solid var(--accent); color: var(--ink); padding: 1px 7px; border-radius: 6px; }
+.desc { margin: 4px 0 0; overflow-wrap: anywhere; }
+.contact { margin-top: auto; padding-top: 8px; display: flex; flex-direction: column; gap: 2px; font-size: 0.92rem; overflow-wrap: anywhere; }
+.empty { text-align: center; color: var(--muted); padding: 40px 0; grid-column: 1 / -1; }
+footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var(--muted); font-size: 0.88rem; }
+@media (max-width: 560px) {
+  .searchbar { flex-direction: column; } .searchbar select { max-width: none; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <p class="eyebrow">Sunshine Coast · Free for everyone</p>
+    <h1 id="siteTitle">Coast Kingdom Business Directory</h1>
+    <p class="lede">Christian-owned businesses, tradies and services from Caloundra to Gympie. Search by name, what they do, or where they are.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="searchbar" role="search">
+    <input id="q" type="search" placeholder="Try “electrician Nambour” or “photographer”" aria-label="Search businesses" autocomplete="off">
+    <select id="area" aria-label="Filter by area"><option value="">All areas</option></select>
+  </div>
+  <div class="chips" id="chips" aria-label="Categories"></div>
+  <div class="bar">
+    <span class="count" id="count">Loading…</span>
+    <button class="btn" id="addBtn" type="button" aria-expanded="false" aria-controls="signup">Add your business, it's free</button>
+  </div>
+  <p class="notice" id="notice" hidden></p>
+
+  <section class="signup" id="signup" hidden>
+    <h2>Add your business</h2>
+    <p class="sub">It's free. Everything except your name will be shown publicly, so only add the contact details you're happy for people to use. We check each listing before it goes live, usually within a day.</p>
+    <form id="form" novalidate>
+      <div class="grid">
+        <div class="field"><label for="f-name">Business name *</label><input id="f-name" name="name" required maxlength="120"></div>
+        <div class="field"><label for="f-category">Category *</label>
+          <select id="f-category" name="category" required>
+            <option value="">Choose one</option>
+          </select>
+        </div>
+        <div class="field full"><label for="f-what">What you do * <span class="hint">(one line)</span></label><input id="f-what" name="what" required maxlength="200" placeholder="e.g. Residential electrician, solar and switchboard upgrades"></div>
+        <div class="field"><label for="f-area">Suburb you're based in *</label><input id="f-area" name="area" required maxlength="60" placeholder="e.g. Nambour"></div>
+        <div class="field"><label for="f-serves">Areas you serve</label><input id="f-serves" name="serves" maxlength="120" placeholder="e.g. Whole coast, or online"></div>
+        <div class="field"><label for="f-website">Website</label><input id="f-website" name="website" maxlength="200" inputmode="url"></div>
+        <div class="field"><label for="f-social">Facebook or Instagram</label><input id="f-social" name="social" maxlength="200"></div>
+        <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" maxlength="30" inputmode="tel"></div>
+        <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" maxlength="120"></div>
+        <div class="field full"><label for="f-contact">Your name * <span class="hint">(not shown, just so we know who to ask)</span></label><input id="f-contact" name="contact" required maxlength="80"></div>
+        <div class="hp" aria-hidden="true"><label for="f-hp">Leave this empty</label><input id="f-hp" name="hp" tabindex="-1" autocomplete="off"></div>
+        <div class="check"><input id="f-consent" name="consent" type="checkbox" required><label for="f-consent">I own or represent this business and I'm happy for these details to be listed publicly.</label></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="submitBtn" type="submit">Send my listing</button>
+        <button class="linkbtn" id="cancelBtn" type="button">Cancel</button>
+        <span class="status" id="status" role="status"></span>
+      </div>
+    </form>
+  </section>
+
+  <section class="list" id="list" aria-live="polite"></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Listings are added by the businesses themselves. Need yours changed or removed? Just submit it again with a note, or get in touch.
+    <br>Built for the community by <a id="credit" href="#" target="_blank" rel="noopener">PocketRocket Solutions</a>.
+  </div>
+</footer>
+
+<script>
+/* ===== SETTINGS: the only part you need to edit ===== */
+const CONFIG = {
+  title: "Coast Kingdom Business Directory",
+  // Paste your Google Apps Script "Web app" URL here (ends in /exec).
+  apiUrl: "https://script.google.com/macros/s/AKfycbyET3DbO5HP1zJ04p9GLQ7zYRtI-_t8DfCfqnu4TdEP_rwZMrxI9yIXnyWujZCHwaQN/exec",
+  creditName: "PocketRocket Solutions",
+  creditUrl: "https://pocketrocketsolutions.com.au"
+};
+const CATEGORIES = ["Automotive", "Business Services", "Cleaning & Property", "Coaching", "Community & Ministry",
+  "Counselling & Psychology", "Creative & Art", "Disability Support", "Events & Music", "Farm & Handmade",
+  "Food & Coffee", "Hair & Beauty", "Health & Wellbeing", "Kids & Education", "Legal & Finance",
+  "Marketing & Web", "Pets", "Photography & Video", "Real Estate", "Retail & Gifts", "Trades & Building", "Other"];
+/* ==================================================== */
+
+const EXAMPLES = [
+  { name: "Example: Glasshouse Sparky Co", what: "Domestic and rural electrical, solar maintenance", category: "Trades & Building", area: "Beerwah", serves: "Hinterland and Caloundra", phone: "0400 000 000" },
+  { name: "Example: Mooloolah Valley Bookkeeping", what: "BAS, payroll and Xero setup for small business", category: "Business Services", area: "Mooloolah Valley", serves: "Sunshine Coast and online", email: "hello@example.com" },
+  { name: "Example: Shoreline Family Photography", what: "Family, newborn and wedding photography", category: "Photography & Video", area: "Kawana", serves: "Whole coast", website: "example.com" },
+  { name: "Example: Little Sprouts Speech", what: "Mobile speech therapy for kids 2 to 12", category: "Health & Wellbeing", area: "Buderim", serves: "Maroochydore to Caloundra", phone: "0400 111 222" },
+  { name: "Example: Bli Bli Bean Cafe", what: "Breakfast, coffee and catering", category: "Food & Coffee", area: "Bli Bli", social: "instagram.com/example" },
+  { name: "Example: Coastline Painting", what: "Interior and exterior house painting", category: "Trades & Building", area: "Caloundra", serves: "Southern coast", phone: "0400 333 444" }
+].map(r => Object.assign({ example: true }, r));
+
+const $ = id => document.getElementById(id);
+let rows = [], activeCat = "";
+
+function norm(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+function linkify(u) { return /^https?:\/\//i.test(u) ? u : "https://" + u.replace(/^\/+/, ""); }
+function bare(u) { return u.replace(/^https?:\/\/(www\.)?/i, ""); }
+function el(tag, attrs, text) {
+  const e = document.createElement(tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function render() {
+  const words = norm($("q").value).split(/\s+/).filter(Boolean);
+  const area = $("area").value;
+  const shown = rows.filter(r =>
+    (!activeCat || r.category === activeCat) &&
+    (!area || norm(r.area) === norm(area)) &&
+    words.every(w => r._hay.includes(w)));
+  const list = $("list"); list.replaceChildren();
+  if (!shown.length) list.append(el("p", { class: "empty" }, rows.length ? "No matches. Try a different word, or clear the filters." : "No businesses listed yet. Be the first!"));
+  for (const r of shown) {
+    const c = el("article", { class: "card" });
+    c.append(el("h2", null, r.name));
+    const m = el("p", { class: "meta" });
+    if (r.category) m.append(el("span", { class: "tag" }, r.category));
+    if (r.area) m.append(el("span", null, "📍 " + r.area));
+    if (r.example) m.append(el("span", { class: "ex" }, "Example listing"));
+    c.append(m);
+    if (r.what) c.append(el("p", { class: "desc" }, r.what));
+    if (r.serves) c.append(el("p", { class: "meta" }, "Serves: " + r.serves));
+    const ct = el("div", { class: "contact" });
+    if (r.phone) ct.append(el("a", { href: "tel:" + r.phone.replace(/[^\d+]/g, "") }, "☎ " + r.phone));
+    if (r.email) ct.append(el("a", { href: "mailto:" + r.email }, "✉ " + r.email));
+    if (r.website) ct.append(el("a", { href: linkify(r.website), target: "_blank", rel: "noopener" }, "🌐 " + bare(r.website)));
+    if (r.social) ct.append(el("a", { href: linkify(r.social), target: "_blank", rel: "noopener" }, "↗ " + bare(r.social)));
+    if (ct.childNodes.length) c.append(ct);
+    list.append(c);
+  }
+  $("count").textContent = shown.length === rows.length
+    ? rows.length + (rows.length === 1 ? " business" : " businesses")
+    : "Showing " + shown.length + " of " + rows.length;
+}
+
+function buildFilters() {
+  const cats = [...new Set(rows.map(r => r.category).filter(Boolean))].sort();
+  const chips = $("chips"); chips.replaceChildren();
+  const make = (label, val) => {
+    const b = el("button", { class: "chip", type: "button", "aria-pressed": String(activeCat === val) }, label);
+    b.addEventListener("click", () => { activeCat = activeCat === val && val ? "" : val; buildFilters(); render(); });
+    chips.append(b);
+  };
+  make("All", "");
+  cats.forEach(c => make(c, c));
+  const sel = $("area"), cur = sel.value;
+  const areas = [...new Set(rows.map(r => r.area).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  sel.replaceChildren(el("option", { value: "" }, "All areas"));
+  areas.forEach(a => sel.append(el("option", { value: a }, a)));
+  sel.value = areas.includes(cur) ? cur : "";
+}
+
+function useRows(r) {
+  rows = r.map(x => Object.assign({}, x, { _hay: norm([x.name, x.what, x.category, x.area, x.serves].join(" ")) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  buildFilters(); render();
+}
+
+function toggleForm(open) {
+  $("signup").hidden = !open;
+  $("addBtn").setAttribute("aria-expanded", String(open));
+  if (open) { $("signup").scrollIntoView({ behavior: "smooth", block: "start" }); $("f-name").focus({ preventScroll: true }); }
+}
+
+async function submitForm(ev) {
+  ev.preventDefault();
+  const f = $("form"), status = $("status");
+  status.className = "status"; status.textContent = "";
+  const firstBad = [...f.querySelectorAll("[required]")].find(i => i.type === "checkbox" ? !i.checked : !i.value.trim());
+  if (firstBad) { status.className = "status err"; status.textContent = "Please fill in the fields marked * and tick the box."; firstBad.focus(); return; }
+  const email = $("f-email");
+  if (email.value && !email.checkValidity()) { status.className = "status err"; status.textContent = "That email address doesn't look right."; email.focus(); return; }
+
+  const data = {};
+  ["name", "what", "category", "area", "serves", "website", "social", "phone", "email", "contact", "hp"].forEach(k => data[k] = f.elements[k].value.trim());
+  data.consent = $("f-consent").checked;
+
+  if (!CONFIG.apiUrl) {
+    status.className = "status ok"; status.textContent = "Preview mode: the form works, but nothing is saved until the site is connected to your sheet.";
+    return;
+  }
+  const btn = $("submitBtn"); btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const res = await fetch(CONFIG.apiUrl, { method: "POST", body: JSON.stringify(data) });
+    const out = await res.json();
+    if (!out.ok) throw new Error(out.error || "failed");
+    f.reset();
+    status.className = "status ok";
+    status.textContent = "Thanks! Your listing has been sent and will appear once it's checked, usually within a day.";
+  } catch (e) {
+    status.className = "status err";
+    status.textContent = e.message && e.message !== "failed" && !/fetch|network|json/i.test(e.message) ? e.message : "That didn't send. Please check your connection and try again.";
+  } finally { btn.disabled = false; btn.textContent = "Send my listing"; }
+}
+
+async function init() {
+  document.title = CONFIG.title; $("siteTitle").textContent = CONFIG.title;
+  $("credit").textContent = CONFIG.creditName; $("credit").href = CONFIG.creditUrl;
+  CATEGORIES.forEach(c => $("f-category").append(el("option", { value: c }, c)));
+  $("q").addEventListener("input", render);
+  $("area").addEventListener("change", render);
+  $("addBtn").addEventListener("click", () => toggleForm($("signup").hidden));
+  $("cancelBtn").addEventListener("click", () => toggleForm(false));
+  $("form").addEventListener("submit", submitForm);
+  if (location.hash === "#add") toggleForm(true);
+
+  if (!CONFIG.apiUrl) {
+    $("notice").textContent = "Preview mode: these are made-up example listings. Real listings appear once the site is connected to your Google Sheet.";
+    $("notice").hidden = false;
+    useRows(EXAMPLES); return;
+  }
+  try {
+    const res = await fetch(CONFIG.apiUrl);
+    const out = await res.json();
+    useRows(Array.isArray(out.listings) ? out.listings : []);
+  } catch (e) {
+    $("notice").textContent = "We couldn't load the listings just now. Please refresh in a moment.";
+    $("notice").hidden = false; useRows([]);
+  }
+}
+init();
+</script>
