@@ -9,6 +9,13 @@
 <meta property="og:description" content="Find and support Christian-owned businesses on the Sunshine Coast. Free to search, free to list.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kingdomlocal.net.au/">
+<meta property="og:image" content="https://kingdomlocal.net.au/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#1f3d2c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
@@ -56,8 +63,13 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
 a { color: var(--link); }
 .wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; }
 header.band { background: var(--band); color: var(--band-ink); padding-block: 40px 56px; }
-.eyebrow { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin: 0 0 8px; }
-h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.9rem, 5vw, 3rem); line-height: 1.05; margin: 0; text-wrap: balance; max-width: 18ch; }
+.eyebrow { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin: 16px 0 0; }
+.brand { display: flex; align-items: center; gap: clamp(12px, 3vw, 20px); }
+.brand .pin { width: clamp(52px, 10vw, 84px); height: auto; flex: none; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.4rem, 7vw, 3.6rem); line-height: 0.95; letter-spacing: -0.02em; margin: 0; }
+h1 .l2 { display: block; font-weight: 500; }
+h1 .dot { position: relative; display: inline-block; }
+h1 .dot svg { position: absolute; left: 50%; top: 0.02em; width: 0.4em; height: auto; transform: translateX(-50%); }
 .lede { margin: 12px 0 0; max-width: 58ch; opacity: 0.9; }
 .searchbar { margin-top: -28px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; display: flex; gap: 8px; box-shadow: 0 6px 24px rgba(15,35,24,0.12); }
 .searchbar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 1.05rem; padding: 10px 12px; }
@@ -114,8 +126,15 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
 
 <header class="band">
   <div class="wrap">
+    <div class="brand">
+      <svg class="pin" viewBox="0 0 100 120" aria-hidden="true">
+        <path d="M50 116 C50 116 12 76 12 48 A38 38 0 0 1 88 48 C88 76 50 116 50 116 Z" fill="#f2b632"></path>
+        <path d="M30 62 V38 L40 49 L50 30 L60 49 L70 38 V62 Z" style="fill: var(--band)"></path>
+        <rect x="30" y="65" width="40" height="6" rx="2" style="fill: var(--band)"></rect>
+      </svg>
+      <h1 aria-label="Kingdom Local">k<span class="dot">ı<svg viewBox="0 0 40 28" aria-hidden="true"><path d="M2 26 V8 L11 16 L20 2 L29 16 L38 8 V26 Z" fill="#f2b632"></path></svg></span>ngdom<span class="l2">local</span></h1>
+    </div>
     <p class="eyebrow">Sunshine Coast · Free for everyone</p>
-    <h1 id="siteTitle">Kingdom Local</h1>
     <p class="lede">Christian-owned businesses, tradies and services from Caloundra to Gympie. Search by name, what they do, or where they are.</p>
   </div>
 </header>
@@ -326,7 +345,7 @@ async function submitForm(ev) {
 }
 
 async function init() {
-  document.title = CONFIG.title + " Sunshine Coast"; $("siteTitle").textContent = CONFIG.title;
+  document.title = CONFIG.title + " Sunshine Coast";
   $("credit").textContent = CONFIG.creditName; $("credit").href = CONFIG.creditUrl;
   buildCategoryOptions();
   $("f-category").addEventListener("change", e => showOther(e.target.value === "Other"));
