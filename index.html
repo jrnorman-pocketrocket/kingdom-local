@@ -1,4 +1,4 @@
-<title>Coast Kingdom Business Directory</title>
+<title>Kingdom Local Sunshine Coast</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
@@ -99,7 +99,7 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
 <header class="band">
   <div class="wrap">
     <p class="eyebrow">Sunshine Coast · Free for everyone</p>
-    <h1 id="siteTitle">Coast Kingdom Business Directory</h1>
+    <h1 id="siteTitle">Kingdom Local</h1>
     <p class="lede">Christian-owned businesses, tradies and services from Caloundra to Gympie. Search by name, what they do, or where they are.</p>
   </div>
 </header>
@@ -159,7 +159,7 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
 <script>
 /* ===== SETTINGS: the only part you need to edit ===== */
 const CONFIG = {
-  title: "Coast Kingdom Business Directory",
+  title: "Kingdom Local",
   // Paste your Google Apps Script "Web app" URL here (ends in /exec).
   apiUrl: "https://script.google.com/macros/s/AKfycbyET3DbO5HP1zJ04p9GLQ7zYRtI-_t8DfCfqnu4TdEP_rwZMrxI9yIXnyWujZCHwaQN/exec",
   creditName: "PocketRocket Solutions",
@@ -286,7 +286,7 @@ async function submitForm(ev) {
 }
 
 async function init() {
-  document.title = CONFIG.title; $("siteTitle").textContent = CONFIG.title;
+  document.title = CONFIG.title + " Sunshine Coast"; $("siteTitle").textContent = CONFIG.title;
   $("credit").textContent = CONFIG.creditName; $("credit").href = CONFIG.creditUrl;
   CATEGORIES.forEach(c => $("f-category").append(el("option", { value: c }, c)));
   $("q").addEventListener("input", render);
