@@ -1,4 +1,14 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kingdom Local Sunshine Coast</title>
+<meta name="description" content="Find and support Christian-owned businesses on the Sunshine Coast. Free to search, free to list.">
+<meta property="og:title" content="Kingdom Local Sunshine Coast">
+<meta property="og:description" content="Find and support Christian-owned businesses on the Sunshine Coast. Free to search, free to list.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kingdomlocal.net.au/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
@@ -38,6 +48,10 @@
   --good: #7fd1a8; --bad: #ff8a80; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
 a { color: var(--link); }
 .wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; }
@@ -95,6 +109,8 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
+</head>
+<body>
 
 <header class="band">
   <div class="wrap">
@@ -127,6 +143,7 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
             <option value="">Choose one</option>
           </select>
         </div>
+        <div class="field full" id="otherWrap" hidden><label for="f-othercat">What category fits your business? *</label><input id="f-othercat" name="othercat" maxlength="40" placeholder="e.g. Weddings & Events"></div>
         <div class="field full"><label for="f-what">What you do * <span class="hint">(one line)</span></label><input id="f-what" name="what" required maxlength="200" placeholder="e.g. Residential electrician, solar and switchboard upgrades"></div>
         <div class="field"><label for="f-area">Suburb you're based in *</label><input id="f-area" name="area" required maxlength="60" placeholder="e.g. Nambour"></div>
         <div class="field"><label for="f-serves">Areas you serve</label><input id="f-serves" name="serves" maxlength="120" placeholder="e.g. Whole coast, or online"></div>
@@ -243,9 +260,31 @@ function buildFilters() {
 }
 
 function useRows(r) {
-  rows = r.map(x => Object.assign({}, x, { _hay: norm([x.name, x.what, x.category, x.area, x.serves].join(" ")) }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  buildFilters(); render();
+  rows = r.map(x => {
+    const raw = x.category || "";
+    return Object.assign({}, x, {
+      category: /^other\b/i.test(raw) ? "Other" : raw,
+      _hay: norm([x.name, x.what, raw, x.area, x.serves].join(" "))
+    });
+  }).sort((a, b) => a.name.localeCompare(b.name));
+  buildCategoryOptions(); buildFilters(); render();
+}
+
+// Signup dropdown = starter list + any new categories you've approved in the sheet.
+function buildCategoryOptions() {
+  const sel = $("f-category"), cur = sel.value;
+  const extra = rows.filter(r => !r.example).map(r => r.category);
+  const all = [...new Set(CATEGORIES.concat(extra))].filter(c => c && c !== "Other").sort();
+  sel.replaceChildren(el("option", { value: "" }, "Choose one"));
+  all.forEach(c => sel.append(el("option", { value: c }, c)));
+  sel.append(el("option", { value: "Other" }, "Other (tell us what fits)"));
+  if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+}
+
+function showOther(on) {
+  $("otherWrap").hidden = !on;
+  $("f-othercat").required = on;
+  if (!on) $("f-othercat").value = "";
 }
 
 function toggleForm(open) {
@@ -266,6 +305,7 @@ async function submitForm(ev) {
   const data = {};
   ["name", "what", "category", "area", "serves", "website", "social", "phone", "email", "contact", "hp"].forEach(k => data[k] = f.elements[k].value.trim());
   data.consent = $("f-consent").checked;
+  if (data.category === "Other") data.category = "Other: " + f.elements.othercat.value.trim();
 
   if (!CONFIG.apiUrl) {
     status.className = "status ok"; status.textContent = "Preview mode: the form works, but nothing is saved until the site is connected to your sheet.";
@@ -276,7 +316,7 @@ async function submitForm(ev) {
     const res = await fetch(CONFIG.apiUrl, { method: "POST", body: JSON.stringify(data) });
     const out = await res.json();
     if (!out.ok) throw new Error(out.error || "failed");
-    f.reset();
+    f.reset(); showOther(false);
     status.className = "status ok";
     status.textContent = "Thanks! Your listing has been sent and will appear once it's checked, usually within a day.";
   } catch (e) {
@@ -288,7 +328,8 @@ async function submitForm(ev) {
 async function init() {
   document.title = CONFIG.title + " Sunshine Coast"; $("siteTitle").textContent = CONFIG.title;
   $("credit").textContent = CONFIG.creditName; $("credit").href = CONFIG.creditUrl;
-  CATEGORIES.forEach(c => $("f-category").append(el("option", { value: c }, c)));
+  buildCategoryOptions();
+  $("f-category").addEventListener("change", e => showOther(e.target.value === "Other"));
   $("q").addEventListener("input", render);
   $("area").addEventListener("change", render);
   $("addBtn").addEventListener("click", () => toggleForm($("signup").hidden));
@@ -312,3 +353,5 @@ async function init() {
 }
 init();
 </script>
+</body>
+</html>
