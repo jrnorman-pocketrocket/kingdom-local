@@ -84,6 +84,7 @@ h1 .dot svg { position: absolute; left: 50%; top: 0.02em; width: 0.4em; height: 
 .count { color: var(--muted); font-size: 0.95rem; font-variant-numeric: tabular-nums; }
 .btn { border: 0; cursor: pointer; font: inherit; background: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 10px 16px; border-radius: 10px; }
 .btn[disabled] { opacity: 0.6; cursor: wait; }
+.reveal { align-self: flex-start; text-align: left; font-size: inherit; }
 .linkbtn { border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
 .notice { margin-top: 16px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 0.92rem; }
 
@@ -232,6 +233,28 @@ function el(tag, attrs, text) {
   return e;
 }
 
+// Phone and email arrive scrambled; they're only decoded when a visitor taps to show them.
+const revealed = new Set();
+function unscramble(s) {
+  try {
+    const bin = atob(String(s).split("").reverse().join(""));
+    return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+  } catch (e) { return ""; }
+}
+function reveal(id, label, getValue, makeLink) {
+  if (revealed.has(id)) { const v = getValue(); if (v) return makeLink(v); }
+  const b = el("button", { class: "linkbtn reveal", type: "button" }, label);
+  b.addEventListener("click", () => {
+    const v = getValue();
+    if (!v) return;
+    revealed.add(id);
+    const a = makeLink(v);
+    b.replaceWith(a);
+    a.focus();
+  });
+  return b;
+}
+
 function render() {
   const words = norm($("q").value).split(/\s+/).filter(Boolean);
   const area = $("area").value;
@@ -252,8 +275,10 @@ function render() {
     if (r.what) c.append(el("p", { class: "desc" }, r.what));
     if (r.serves) c.append(el("p", { class: "meta" }, "Serves: " + r.serves));
     const ct = el("div", { class: "contact" });
-    if (r.phone) ct.append(el("a", { href: "tel:" + r.phone.replace(/[^\d+]/g, "") }, "☎ " + r.phone));
-    if (r.email) ct.append(el("a", { href: "mailto:" + r.email }, "✉ " + r.email));
+    const phone = r.pe ? () => unscramble(r.pe) : r.phone ? () => r.phone : null;
+    const email = r.ee ? () => unscramble(r.ee) : r.email ? () => r.email : null;
+    if (phone) ct.append(reveal(r.name + "|p", "☎ Show phone", phone, v => el("a", { href: "tel:" + v.replace(/[^\d+]/g, "") }, "☎ " + v)));
+    if (email) ct.append(reveal(r.name + "|e", "✉ Show email", email, v => el("a", { href: "mailto:" + v }, "✉ " + v)));
     if (r.website) ct.append(el("a", { href: linkify(r.website), target: "_blank", rel: "noopener" }, "🌐 " + bare(r.website)));
     if (r.social) ct.append(el("a", { href: linkify(r.social), target: "_blank", rel: "noopener" }, "↗ " + bare(r.social)));
     if (r.google) ct.append(el("a", { href: linkify(r.google), target: "_blank", rel: "noopener" }, "★ Google reviews & map"));
