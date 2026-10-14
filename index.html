@@ -99,6 +99,7 @@ h1 .dot svg { position: absolute; left: 50%; top: 0.02em; width: 0.4em; height: 
 .field input:focus, .field select:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
 .check { display: flex; gap: 10px; align-items: flex-start; grid-column: 1 / -1; }
 .check input { width: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--band); }
+.promise { grid-column: 1 / -1; margin: 0; font-size: 0.9rem; color: var(--muted); }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 16px; }
 .status { font-size: 0.95rem; }
@@ -170,9 +171,11 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
         <div class="field"><label for="f-social">Facebook or Instagram</label><input id="f-social" name="social" maxlength="200"></div>
         <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" maxlength="30" inputmode="tel"></div>
         <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" maxlength="120"></div>
+        <div class="field full"><label for="f-google">Google Business Profile link <span class="hint">(optional, so people can see your reviews and find you on the map)</span></label><input id="f-google" name="google" maxlength="300" inputmode="url" placeholder="Paste the Share link from your Google profile"></div>
         <div class="field full"><label for="f-contact">Your name * <span class="hint">(not shown, just so we know who to ask)</span></label><input id="f-contact" name="contact" required maxlength="80"></div>
         <div class="hp" aria-hidden="true"><label for="f-hp">Leave this empty</label><input id="f-hp" name="hp" tabindex="-1" autocomplete="off"></div>
-        <div class="check"><input id="f-consent" name="consent" type="checkbox" required><label for="f-consent">I own or represent this business and I'm happy for these details to be listed publicly.</label></div>
+        <div class="check"><input id="f-consent" name="consent" type="checkbox" required><label for="f-consent">I own or represent this business and I'm happy for these details to be listed publicly, as set out in the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</label></div>
+        <p class="promise">No spam, ever. We'll only contact you about your listing. You won't be added to any mailing list, and we never share or sell your details.</p>
       </div>
       <div class="actions">
         <button class="btn" id="submitBtn" type="submit">Send my listing</button>
@@ -187,8 +190,8 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
 
 <footer>
   <div class="wrap">
-    Listings are added by the businesses themselves. Need yours changed or removed? Just submit it again with a note, or get in touch.
-    <br>Built for the community by <a id="credit" href="#" target="_blank" rel="noopener">PocketRocket Solutions</a>.
+    Listings are added by the businesses themselves. Need yours changed or removed? Email james@pocketrocketsolutions.com.au.
+    <br><a href="privacy.html">Privacy policy</a> · Built for the community by <a id="credit" href="#" target="_blank" rel="noopener">PocketRocket Solutions</a>.
   </div>
 </footer>
 
@@ -253,6 +256,7 @@ function render() {
     if (r.email) ct.append(el("a", { href: "mailto:" + r.email }, "✉ " + r.email));
     if (r.website) ct.append(el("a", { href: linkify(r.website), target: "_blank", rel: "noopener" }, "🌐 " + bare(r.website)));
     if (r.social) ct.append(el("a", { href: linkify(r.social), target: "_blank", rel: "noopener" }, "↗ " + bare(r.social)));
+    if (r.google) ct.append(el("a", { href: linkify(r.google), target: "_blank", rel: "noopener" }, "★ Google reviews & map"));
     if (ct.childNodes.length) c.append(ct);
     list.append(c);
   }
@@ -322,7 +326,7 @@ async function submitForm(ev) {
   if (email.value && !email.checkValidity()) { status.className = "status err"; status.textContent = "That email address doesn't look right."; email.focus(); return; }
 
   const data = {};
-  ["name", "what", "category", "area", "serves", "website", "social", "phone", "email", "contact", "hp"].forEach(k => data[k] = f.elements[k].value.trim());
+  ["name", "what", "category", "area", "serves", "website", "social", "phone", "email", "google", "contact", "hp"].forEach(k => data[k] = f.elements[k].value.trim());
   data.consent = $("f-consent").checked;
   if (data.category === "Other") data.category = "Other: " + f.elements.othercat.value.trim();
 
