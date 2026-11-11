@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160">
+  <rect x="2" y="2" width="596" height="156" rx="24" fill="#1f3d2c" stroke="#f2b632" stroke-width="4"/>
+  <g transform="translate(34 22) scale(0.97)">
+    <path d="M50 116 C50 116 12 76 12 48 A38 38 0 0 1 88 48 C88 76 50 116 50 116 Z" fill="#f2b632"/>
+    <path d="M30 62 V38 L40 49 L50 30 L60 49 L70 38 V62 Z" fill="#1f3d2c"/>
+    <rect x="30" y="65" width="40" height="6" rx="2" fill="#1f3d2c"/>
+  </g>
+  <text x="150" y="64" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="26" fill="#f6f8f4" opacity="0.85">Find us on</text>
+  <text x="148" y="110" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" fill="#ffffff">Kingdom Local</text>
+  <text x="150" y="140" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="19" fill="#f2b632">kingdomlocal.net.au</text>
+</svg>
