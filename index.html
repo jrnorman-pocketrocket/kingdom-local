@@ -2,6 +2,8 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; form-action 'none'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kingdom Local Sunshine Coast</title>
 <meta name="description" content="Find and support Christian-owned businesses on the Sunshine Coast. Free to search, free to list.">
@@ -106,6 +108,9 @@ h1 .dot svg { position: absolute; left: 50%; top: 0.02em; width: 0.4em; height: 
 .status { font-size: 0.95rem; }
 .status.ok { color: var(--good); }
 .status.err { color: var(--bad); }
+.share { margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--chip); }
+.share p { margin: 0 0 10px; }
+.share .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-block: 18px 40px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -184,6 +189,14 @@ footer { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var
         <span class="status" id="status" role="status"></span>
       </div>
     </form>
+    <div class="share" id="share" hidden>
+      <p><b>Know another Christian business owner?</b> The directory grows when we invite each other. Send them the link:</p>
+      <div class="row">
+        <button class="btn" id="shareBtn" type="button">Share Kingdom Local</button>
+        <a class="linkbtn" id="fbShare" target="_blank" rel="noopener" href="#">Post on Facebook</a>
+        <span class="status" id="shareStatus" role="status"></span>
+      </div>
+    </div>
   </section>
 
   <section class="list" id="list" aria-live="polite"></section>
@@ -241,17 +254,32 @@ function unscramble(s) {
     return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
   } catch (e) { return ""; }
 }
+// Phone and email are fetched one listing at a time, only when someone taps, so they can't be harvested in bulk.
+const contacts = {};
+function fetchContact(id) {
+  if (!contacts[id]) contacts[id] = fetch(CONFIG.apiUrl + "?c=" + encodeURIComponent(id))
+    .then(r => r.json())
+    .then(c => { if (!c.ok) throw new Error(c.error || ""); return c; })
+    .catch(e => { delete contacts[id]; throw e; });
+  return contacts[id];
+}
 function reveal(id, label, getValue, makeLink) {
-  if (revealed.has(id)) { const v = getValue(); if (v) return makeLink(v); }
   const b = el("button", { class: "linkbtn reveal", type: "button" }, label);
-  b.addEventListener("click", () => {
-    const v = getValue();
-    if (!v) return;
-    revealed.add(id);
-    const a = makeLink(v);
-    b.replaceWith(a);
-    a.focus();
-  });
+  const show = async () => {
+    b.disabled = true; b.textContent = "Loading…";
+    try {
+      const v = await getValue();
+      if (!v) { b.textContent = "Not listed"; return; }
+      revealed.add(id);
+      const a = makeLink(v);
+      b.replaceWith(a);
+      if (document.activeElement === b) a.focus();
+    } catch (e) {
+      b.disabled = false; b.textContent = e.message || "Couldn't load, tap to retry";
+    }
+  };
+  b.addEventListener("click", show);
+  if (revealed.has(id)) show();
   return b;
 }
 
@@ -275,8 +303,8 @@ function render() {
     if (r.what) c.append(el("p", { class: "desc" }, r.what));
     if (r.serves) c.append(el("p", { class: "meta" }, "Serves: " + r.serves));
     const ct = el("div", { class: "contact" });
-    const phone = r.pe ? () => unscramble(r.pe) : r.phone ? () => r.phone : null;
-    const email = r.ee ? () => unscramble(r.ee) : r.email ? () => r.email : null;
+    const phone = r.p ? () => fetchContact(r.id).then(c => c.phone) : r.pe ? () => unscramble(r.pe) : r.phone ? () => r.phone : null;
+    const email = r.m ? () => fetchContact(r.id).then(c => c.email) : r.ee ? () => unscramble(r.ee) : r.email ? () => r.email : null;
     if (phone) ct.append(reveal(r.name + "|p", "☎ Show phone", phone, v => el("a", { href: "tel:" + v.replace(/[^\d+]/g, "") }, "☎ " + v)));
     if (email) ct.append(reveal(r.name + "|e", "✉ Show email", email, v => el("a", { href: "mailto:" + v }, "✉ " + v)));
     if (r.website) ct.append(el("a", { href: linkify(r.website), target: "_blank", rel: "noopener" }, "🌐 " + bare(r.website)));
@@ -335,7 +363,9 @@ function showOther(on) {
   if (!on) $("f-othercat").value = "";
 }
 
+let formOpenedAt = 0;
 function toggleForm(open) {
+  if (open && $("signup").hidden) formOpenedAt = Date.now();
   $("signup").hidden = !open;
   $("addBtn").setAttribute("aria-expanded", String(open));
   if (open) { $("signup").scrollIntoView({ behavior: "smooth", block: "start" }); $("f-name").focus({ preventScroll: true }); }
@@ -353,6 +383,7 @@ async function submitForm(ev) {
   const data = {};
   ["name", "what", "category", "area", "serves", "website", "social", "phone", "email", "google", "contact", "hp"].forEach(k => data[k] = f.elements[k].value.trim());
   data.consent = $("f-consent").checked;
+  data.t = Date.now() - formOpenedAt;
   if (data.category === "Other") data.category = "Other: " + f.elements.othercat.value.trim();
 
   if (!CONFIG.apiUrl) {
@@ -367,6 +398,7 @@ async function submitForm(ev) {
     f.reset(); showOther(false);
     status.className = "status ok";
     status.textContent = "Thanks! Your listing has been sent and will appear once it's checked, usually within a day.";
+    $("share").hidden = false;
   } catch (e) {
     status.className = "status err";
     status.textContent = e.message && e.message !== "failed" && !/fetch|network|json/i.test(e.message) ? e.message : "That didn't send. Please check your connection and try again.";
@@ -384,6 +416,16 @@ async function init() {
   $("cancelBtn").addEventListener("click", () => toggleForm(false));
   $("form").addEventListener("submit", submitForm);
   if (location.hash === "#add") toggleForm(true);
+  const q = new URLSearchParams(location.search).get("q");
+  if (q) $("q").value = q;
+  const shareUrl = "https://kingdomlocal.net.au/";
+  const shareText = "Kingdom Local is a free directory of Christian-owned businesses on the Sunshine Coast. Free to list, takes 2 minutes:";
+  $("fbShare").href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl);
+  $("shareBtn").addEventListener("click", async () => {
+    if (navigator.share) { try { await navigator.share({ title: "Kingdom Local", text: shareText, url: shareUrl }); } catch (e) {} return; }
+    try { await navigator.clipboard.writeText(shareText + " " + shareUrl); $("shareStatus").textContent = "Link copied, paste it anywhere."; }
+    catch (e) { $("shareStatus").textContent = shareUrl; }
+  });
 
   if (!CONFIG.apiUrl) {
     $("notice").textContent = "Preview mode: these are made-up example listings. Real listings appear once the site is connected to your Google Sheet.";
