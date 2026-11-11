@@ -315,6 +315,25 @@ function sendLiveEmail_(to, person, business) {
   MailApp.sendEmail({ to: to, subject: 'You\'re live on Kingdom Local', body: text, htmlBody: html, name: 'Kingdom Local', replyTo: NOTIFY_TO });
 }
 
+// Run ONCE by hand after setup: sends the "you're live" share email to businesses approved before v2.
+function emailExistingListings() {
+  const s = sheet_();
+  ensureIds_(s);
+  const v = s.sh.getDataRange().getValues();
+  let sent = 0;
+  for (let i = 1; i < v.length; i++) {
+    const r = v[i];
+    if (!isTicked_(r[s.col['Approved'] - 1]) || r[s.col['Live email sent'] - 1] !== '(approved before v2)') continue;
+    const to = String(r[s.col['Public email'] - 1] || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) { s.sh.getRange(i + 1, s.col['Live email sent']).setValue('(no email)'); continue; }
+    if (MailApp.getRemainingDailyQuota() < 5) break; // run again tomorrow to finish
+    sendLiveEmail_(to, String(r[s.col['Contact name (private)'] - 1] || '').trim(), String(r[s.col['Business name'] - 1] || '').trim());
+    s.sh.getRange(i + 1, s.col['Live email sent']).setValue(new Date());
+    sent++;
+  }
+  console.log('Sent ' + sent + ' emails.');
+}
+
 // ---------- morning reminder ----------
 
 function dailyReminder() {
